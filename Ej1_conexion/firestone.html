@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <script src="https://www.gstatic.com/firebasejs/8.2.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.2.1/firebase-firestore.js"></script>
+    <script>
+        //Unique Firebase Object
+        var firebaseConfig = {
+            apiKey: "AIzaSyBl4slNHotjyuiS4uLNf7rPOj3uMDVCZwI",
+            authDomain: "tecnmcurso.firebaseapp.com",
+            projectId: "tecnmcurso",
+            storageBucket: "tecnmcurso.appspot.com",
+            messagingSenderId: "359033810449",
+            appId: "1:359033810449:web:647e6dbdd8d4817c084bb0"
+            //measurementId: "G-05J0RCD13P"
+        };
+
+        //Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        var firestore = firebase.firestore();
+
+        //Variable to access database collection
+        const db = firestore.collection("cities");
+
+
+        // Add a new document in collection "cities"
+        db.doc("LA").set({
+            name: "Los Angeles",
+            state: "CA",
+            country: "USA"
+        })
+            .then(() => {
+                console.log("Document successfully written!");
+            })
+            .catch((error) => {
+                console.error("Error writing document: ", error);
+            });
+
+        var cityRef = db.doc('BJ');
+
+        var setWithMerge = cityRef.set({
+            capital: true
+        }, { merge: true });
+
+        var docData = {
+            stringExample: "Hello world!",
+            booleanExample: true,
+            numberExample: 3.14159265,
+            dateExample: firebase.firestore.Timestamp.fromDate(new Date("December 10, 1815")),
+            arrayExample: [5, true, "hello"],
+            nullExample: null,
+            objectExample: {
+                a: 5,
+                b: {
+                    nested: "foo"
+                }
+            }
+        };
+        db.doc("one").set(docData).then(() => {
+            console.log("Document successfully written!");
+        });
+
+        class City {
+             constructor(name, state, country) {
+                 this.name = name;
+                 this.state = state;
+                 this.country = country;
+             }
+             toString() {
+                 return this.name + ', ' + this.state + ', ' + this.country;
+             }
+         }
+
+        // Firestore data converter
+        var cityConverter = {
+             toFirestore: function (city) {
+                 return {
+                     name: city.name,
+                     state: city.state,
+                     country: city.country
+                 };
+             },
+             fromFirestore: function (snapshot, options) {
+                 const data = snapshot.data(options);
+                 return new City(data.name, data.state, data.country);
+             }
+         };
+
+        // Set with cityConverter
+         db.doc("LA2")
+              .withConverter(cityConverter)
+              .set(new City("Los Angeles2", "CA2", "USA2"));
+
+    </script>
+</body>
+
+</html>
